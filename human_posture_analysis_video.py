@@ -210,6 +210,47 @@ def displayAngles(inclinations, landmark, color, font):
     displaySide(LEFT, landmark, color, font)
     displaySide(RIGHT, landmark, color, font)
 
+
+def isGoodAsana(asana):
+    LEFT, RIGHT = "LEFT", "RIGHT"
+    if asana == "downdog":
+        return 110 < inclinations[LEFT]["NECK"] < 130 \
+            and 110 < inclinations[LEFT]["TORSO"] < 130 \
+            and 130 < inclinations[LEFT]["THIGH"] < 150 \
+            and 140 < inclinations[LEFT]["CALF"] < 160 \
+            and 150 < inclinations[LEFT]["UPPERARM"] < 170 \
+            and 140 < inclinations[LEFT]["FOREARM"] < 160
+    if asana == "tree":
+        return (
+            (  #right leg up
+                20 < inclinations[LEFT]["NECK"] < 40 \
+                and 0 < inclinations[LEFT]["TORSO"] < 20 \
+                and 160 < inclinations[LEFT]["THIGH"] < 180 \
+                and 160 < inclinations[LEFT]["CALF"] < 180 \
+            )
+            and (
+                10 < inclinations[RIGHT]["NECK"] < 30 \
+                and 0 < inclinations[RIGHT]["TORSO"] < 20 \
+                and 110 < inclinations[RIGHT]["THIGH"] < 130 \
+                and 85 < inclinations[RIGHT]["CALF"] < 105 \
+            )
+        ) or (
+            (  #left leg up
+                20 < inclinations[RIGHT]["NECK"] < 40 \
+                and 0 < inclinations[RIGHT]["TORSO"] < 20 \
+                and 160 < inclinations[RIGHT]["THIGH"] < 180 \
+                and 160 < inclinations[RIGHT]["CALF"] < 180 \
+            )
+            and (
+                10 < inclinations[LEFT]["NECK"] < 30 \
+                and 0 < inclinations[LEFT]["TORSO"] < 20 \
+                and 110 < inclinations[LEFT]["THIGH"] < 130 \
+                and 85 < inclinations[LEFT]["CALF"] < 105 \
+            )
+        )
+    else:
+        return False
+
 """
 Function to send alert. Use this function to send alert when bad posture detected.
 Feel free to get creative and customize as per your convenience.
@@ -241,6 +282,7 @@ mp_pose = mp.solutions.pose
 pose = mp_pose.Pose()
 # ===============================================================================================#
 
+ASANA = "tree"
 
 if __name__ == "__main__":
     # For webcam input replace file name with 0.
@@ -302,23 +344,26 @@ if __name__ == "__main__":
         # Put text, Posture and angle inclination.
         # Text string for display.
         angle_text_string_upper_body = 'Neck : ' + str(int(inclinations["LEFT"]["NECK"])) + '  Torso : ' + str(int(inclinations["LEFT"]["TORSO"]))
-        angle_text_string_lower_body = 'Upper Leg : ' + str(int(inclinations["LEFT"]["THIGH"])) + '  Lower Leg : ' + str(int(inclinations["LEFT"]["CALF"]))
-        angle_text_string_arms = 'Upper Arm : ' + str(int(inclinations["LEFT"]["UPPERARM"])) + '  Lower Arm : ' + str(int(inclinations["LEFT"]["FOREARM"]))
+        angle_text_string_lower_body = 'Thigh : ' + str(int(inclinations["LEFT"]["THIGH"])) + '  Calf : ' + str(int(inclinations["LEFT"]["CALF"])) + '  Ankle : ' + str(int(inclinations["LEFT"]["ANKLE"]))
+        angle_text_string_arms = 'UpperArm : ' + str(int(inclinations["LEFT"]["UPPERARM"])) + '  ForeArm : ' + str(int(inclinations["LEFT"]["FOREARM"])) + '  Wrist : ' + str(int(inclinations["LEFT"]["WRIST"]))
+
+        right_angle_text_string_upper_body = 'Neck : ' + str(int(inclinations["RIGHT"]["NECK"])) + '  Torso : ' + str(int(inclinations["RIGHT"]["TORSO"]))
+        right_angle_text_string_lower_body = 'Thigh : ' + str(int(inclinations["RIGHT"]["THIGH"])) + '  Calf : ' + str(int(inclinations["RIGHT"]["CALF"])) + '  Ankle : ' + str(int(inclinations["RIGHT"]["ANKLE"]))
+        right_angle_text_string_arms = 'UpperArm : ' + str(int(inclinations["RIGHT"]["UPPERARM"])) + '  ForeArm : ' + str(int(inclinations["RIGHT"]["FOREARM"])) + '  Wrist : ' + str(int(inclinations["RIGHT"]["WRIST"]))
 
         # Determine whether good posture or bad posture.
         # The threshold angles have been set based on intuition.
-        if 110 < inclinations["LEFT"]["NECK"] < 130 \
-            and 110 < inclinations["LEFT"]["TORSO"] < 130 \
-            and 130 < inclinations["LEFT"]["THIGH"] < 150 \
-            and 140 < inclinations["LEFT"]["CALF"] < 160 \
-            and 150 < inclinations["LEFT"]["UPPERARM"] < 170 \
-            and 140 < inclinations["LEFT"]["FOREARM"] < 160:
+        if isGoodAsana(ASANA):
             bad_frames = 0
             good_frames += 1
             
             cv2.putText(image, angle_text_string_upper_body, (10, 30), font, 0.5, light_green, 2)
             cv2.putText(image, angle_text_string_lower_body, (10, 60), font, 0.5, light_green, 2)
             cv2.putText(image, angle_text_string_arms, (10, 90), font, 0.5, light_green, 2)
+
+            cv2.putText(image, right_angle_text_string_upper_body, (10, 120), font, 0.5, light_green, 2)
+            cv2.putText(image, right_angle_text_string_lower_body, (10, 150), font, 0.5, light_green, 2)
+            cv2.putText(image, right_angle_text_string_arms, (10, 180), font, 0.5, light_green, 2)
 
             displayAngles(inclinations, landmark, light_green, font)
             connectLandmarks(landmark, green)
@@ -330,6 +375,10 @@ if __name__ == "__main__":
             cv2.putText(image, angle_text_string_upper_body, (10, 30), font, 0.5, red, 2)
             cv2.putText(image, angle_text_string_lower_body, (10, 60), font, 0.5, red, 2)
             cv2.putText(image, angle_text_string_arms, (10, 90), font, 0.5, red, 2)
+ 
+            cv2.putText(image, right_angle_text_string_upper_body, (10, 120), font, 0.5, red, 2)
+            cv2.putText(image, right_angle_text_string_lower_body, (10, 150), font, 0.5, red, 2)
+            cv2.putText(image, right_angle_text_string_arms, (10, 180), font, 0.5, red, 2)
 
             displayAngles(inclinations, landmark, red, font)
             connectLandmarks(landmark, red)
